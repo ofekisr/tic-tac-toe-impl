@@ -26,7 +26,7 @@ development_status:
   1-2-typescript-configuration: drafted
   1-3-shared-types-package-setup: review
   1-4-server-package-setup-with-nestjs: done
-  1-5-client-package-setup: drafted
+  1-5-client-package-setup: done
   1-6-docker-compose-configuration: drafted
   1-7-testing-framework-configuration: drafted
   1-1-project-structure: review

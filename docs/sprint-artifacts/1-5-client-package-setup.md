@@ -1,6 +1,6 @@
 # Story 1.5: Client Package Setup
 
-Status: drafted
+Status: done
 
 ## Story
 
@@ -27,35 +27,35 @@ So that I can build the CLI client interface.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Configure client package.json (AC: #1)
-  - [ ] Create `packages/client/package.json`
-  - [ ] Add dependencies: `ws`, `@fusion-tic-tac-toe/shared`
-  - [ ] Add dev dependencies: `typescript`, `@types/node`, `@types/ws`, `ts-node`, `nodemon`, `jest`, `@types/jest`, `ts-jest`
-  - [ ] Add build script: `"build": "tsc"`
-  - [ ] Add start script: `"start": "node dist/index.js"`
-  - [ ] Add dev script: `"dev": "nodemon --exec ts-node src/index.ts"`
-  - [ ] Add test script: `"test": "jest"`
-  - [ ] Test: Verify package.json is valid and dependencies install correctly
+- [x] Task 1: Configure client package.json (AC: #1)
+  - [x] Create `packages/client/package.json`
+  - [x] Add dependencies: `ws`, `@fusion-tic-tac-toe/shared`
+  - [x] Add dev dependencies: `typescript`, `@types/node`, `@types/ws`, `ts-node`, `nodemon`, `jest`, `@types/jest`, `ts-jest`
+  - [x] Add build script: `"build": "tsc"`
+  - [x] Add start script: `"start": "node dist/index.js"`
+  - [x] Add dev script: `"dev": "nodemon --exec ts-node src/index.ts"`
+  - [x] Add test script: `"test": "jest"`
+  - [x] Test: Verify package.json is valid and dependencies install correctly
 
-- [ ] Task 2: Create directory structure (AC: #2)
-  - [ ] Create `packages/client/src/domain/` directory
-  - [ ] Create `packages/client/src/domain/entities/` subdirectory
-  - [ ] Create `packages/client/src/domain/interfaces/` subdirectory
-  - [ ] Create `packages/client/src/application/` directory
-  - [ ] Create `packages/client/src/application/services/` subdirectory
-  - [ ] Create `packages/client/src/application/use-cases/` subdirectory
-  - [ ] Create `packages/client/src/infrastructure/` directory
-  - [ ] Create `packages/client/src/infrastructure/websocket/` subdirectory
-  - [ ] Create `packages/client/src/infrastructure/mocks/` subdirectory
-  - [ ] Create `packages/client/src/presentation/` directory
-  - [ ] Create `packages/client/src/presentation/cli/` subdirectory
-  - [ ] Test: Verify all directories exist
+- [x] Task 2: Create directory structure (AC: #2)
+  - [x] Create `packages/client/src/domain/` directory
+  - [x] Create `packages/client/src/domain/entities/` subdirectory
+  - [x] Create `packages/client/src/domain/interfaces/` subdirectory
+  - [x] Create `packages/client/src/application/` directory
+  - [x] Create `packages/client/src/application/services/` subdirectory
+  - [x] Create `packages/client/src/application/use-cases/` subdirectory
+  - [x] Create `packages/client/src/infrastructure/` directory
+  - [x] Create `packages/client/src/infrastructure/websocket/` subdirectory
+  - [x] Create `packages/client/src/infrastructure/mocks/` subdirectory
+  - [x] Create `packages/client/src/presentation/` directory
+  - [x] Create `packages/client/src/presentation/cli/` subdirectory
+  - [x] Test: Verify all directories exist
 
-- [ ] Task 3: Verify shared types import (AC: #3)
-  - [ ] Create test file importing types from `@fusion-tic-tac-toe/shared`
-  - [ ] Import `Board`, `Move`, `ClientMessage`, `ServerMessage` types
-  - [ ] Verify TypeScript compilation succeeds
-  - [ ] Test: Run `npm run build` and verify no import errors
+- [x] Task 3: Verify shared types import (AC: #3)
+  - [x] Create test file importing types from `@fusion-tic-tac-toe/shared`
+  - [x] Import `Board`, `Move`, `ClientMessage`, `ServerMessage` types
+  - [x] Verify TypeScript compilation succeeds
+  - [x] Test: Run `npm run build` and verify no import errors
 
 ## Dev Notes
 
@@ -101,4 +101,23 @@ So that I can build the CLI client interface.
 ### Completion Notes List
 
 ### File List
+
+- `packages/client/package.json` - Updated with dependencies and scripts
+- `packages/client/src/domain/entities/` - Created directory
+- `packages/client/src/domain/interfaces/` - Created directory
+- `packages/client/src/application/services/` - Created directory
+- `packages/client/src/application/use-cases/` - Created directory
+- `packages/client/src/infrastructure/websocket/` - Created directory
+- `packages/client/src/infrastructure/mocks/` - Created directory
+- `packages/client/src/presentation/cli/` - Created directory
+
+### Completion Notes List
+
+- All acceptance criteria met:
+  1. ✅ package.json configured with all required dependencies and scripts
+  2. ✅ Complete directory structure created following layered architecture
+  3. ✅ Shared types import verified - TypeScript compilation succeeds without errors
+
+- Build verification: Both shared and client packages build successfully
+- Directory structure matches server architecture for consistency
 
