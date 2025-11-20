@@ -6,7 +6,7 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
-  passWithNoTests: true, // Allow passing when no tests exist (Story 1.7 will configure fully)
+  passWithNoTests: true,
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
