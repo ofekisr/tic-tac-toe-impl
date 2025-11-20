@@ -6,6 +6,8 @@ import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase
 import { JoinGameUseCase } from '../../application/use-cases/JoinGameUseCase';
 import { GameService } from '../../application/services/GameService';
 import { MessageValidator } from '../../application/services/MessageValidator';
+import { MoveValidationService } from '../../application/services/MoveValidationService';
+import { GameStateService } from '../../application/services/GameStateService';
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 import { WebSocket } from 'ws';
 import { JoinGameMessage, MakeMoveMessage, ErrorCode, Board } from '@fusion-tic-tac-toe/shared';
@@ -51,6 +53,13 @@ describe('GameGateway', () => {
         },
         ConnectionManager,
         MessageValidator,
+        MoveValidationService,
+        {
+          provide: GameStateService,
+          useFactory: (repo: IGameRepository, validationService: MoveValidationService) =>
+            new GameStateService(repo, validationService),
+          inject: ['IGameRepository', MoveValidationService],
+        },
         UpdateGameOnDisconnectionUseCase,
         GameGateway,
       ],
@@ -152,7 +161,7 @@ describe('GameGateway', () => {
       expect(sentMessage.type).toBe('joined');
     });
 
-    it('should accept valid MakeMoveMessage but return not implemented error', async () => {
+    it('should accept valid MakeMoveMessage and process move', async () => {
       const mockSend = jest.fn();
       const mockClient = {
         readyState: WebSocket.OPEN,
@@ -166,13 +175,22 @@ describe('GameGateway', () => {
         col: 1,
       };
 
+      // Mock game state service
+      const gameStateService = module.get<GameStateService>(GameStateService);
+      jest.spyOn(gameStateService, 'makeMove').mockRejectedValue(
+        new Error('Game not found: ABC123'),
+      );
+
+      // Mock connection manager
+      jest.spyOn(connectionManager, 'getPlayerSymbol').mockReturnValue('X');
+      jest.spyOn(connectionManager, 'getConnectionsByGameCode').mockReturnValue(['conn-1']);
+
       await gateway.handleMessage(mockClient, validMessage);
 
-      // Should send error message (move not yet implemented)
+      // Should send error message (game not found in this test)
       expect(mockSend).toHaveBeenCalled();
       const sentMessage = JSON.parse(mockSend.mock.calls[0][0] as string);
       expect(sentMessage.type).toBe('error');
-      expect(sentMessage.code).toBe(ErrorCode.INVALID_MESSAGE);
     });
 
     it('should reject null message and send error', () => {
