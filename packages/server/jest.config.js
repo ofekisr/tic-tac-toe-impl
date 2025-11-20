@@ -10,9 +10,11 @@ module.exports = {
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
+    '!src/integration/**', // Exclude integration tests from coverage
   ],
   moduleNameMapper: {
     '^@fusion-tic-tac-toe/shared$': '<rootDir>/../shared/src',
   },
+  testTimeout: 30000, // Longer timeout for integration tests
 };
 
