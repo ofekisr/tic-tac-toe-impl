@@ -1,0 +1,14 @@
+{
+  "name": "@fusion-tic-tac-toe/mock-server",
+  "version": "0.0.1",
+  "description": "Standalone mock server for testing",
+  "main": "dist/index.js",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "echo \"Dev script will be configured later\"",
+    "test": "echo \"Tests will be configured in Story 1.7\""
+  }
+}
+

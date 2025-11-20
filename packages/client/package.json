@@ -1,0 +1,14 @@
+{
+  "name": "@fusion-tic-tac-toe/client",
+  "version": "0.0.1",
+  "description": "CLI client application",
+  "main": "dist/index.js",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "echo \"Dev script will be configured in Story 1.5\"",
+    "test": "echo \"Tests will be configured in Story 1.7\""
+  }
+}
+

@@ -29,7 +29,7 @@ development_status:
   1-5-client-package-setup: drafted
   1-6-docker-compose-configuration: drafted
   1-7-testing-framework-configuration: drafted
-  1-1-project-structure: drafted
+  1-1-project-structure: review
   epic-1-retrospective: optional
   epic-2: backlog
   2-1-websocket-server-setup-with-nestjs-gateway: drafted

@@ -16,6 +16,9 @@ build/
 .env.test
 .env.production
 
+# Logs
+*.log
+
 # IDE
 .bmad
 .cursor

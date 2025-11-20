@@ -1,0 +1,14 @@
+{
+  "name": "@fusion-tic-tac-toe/server",
+  "version": "0.0.1",
+  "description": "NestJS WebSocket server",
+  "main": "dist/main.js",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev": "echo \"Dev script will be configured in Story 1.4\"",
+    "test": "echo \"Tests will be configured in Story 1.7\""
+  }
+}
+

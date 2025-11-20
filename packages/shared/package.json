@@ -1,0 +1,13 @@
+{
+  "name": "@fusion-tic-tac-toe/shared",
+  "version": "0.0.1",
+  "description": "Shared TypeScript types and contracts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Tests will be configured in Story 1.7\""
+  }
+}
+
