@@ -130,6 +130,7 @@ So that I can run the complete system locally with proper orchestration.
 - Created comprehensive `.dockerignore` to minimize build context (reduces from ~94MB to ~2-5MB)
 - Optimized Dockerfile with multi-stage build (builder + production stages)
 - Fixed npm ci issues: Removed package-lock.json from .dockerignore, fixed build order (shared → server)
+- Added missing @nestjs/platform-express dependency (required for NestJS HTTP platform adapter)
 - Validated docker-compose.yml syntax (confirmed valid)
 - All configuration complete and ready for Docker daemon testing
 
