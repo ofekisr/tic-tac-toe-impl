@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JoinGameUseCase } from './JoinGameUseCase';
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 import { ConnectionManager } from '../services/ConnectionManager';
+import { GameSyncService } from '../services/GameSyncService';
 import { GameState, Board } from '@fusion-tic-tac-toe/shared';
 import { GameNotFoundException } from '../../domain/exceptions/GameNotFoundException';
 
@@ -27,6 +28,10 @@ describe('JoinGameUseCase', () => {
       removeConnectionFromGame: jest.fn(),
     } as any;
 
+    const mockSyncService = {
+      publishGameUpdate: jest.fn().mockResolvedValue(undefined),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         JoinGameUseCase,
@@ -37,6 +42,10 @@ describe('JoinGameUseCase', () => {
         {
           provide: ConnectionManager,
           useValue: mockConnectionManager,
+        },
+        {
+          provide: GameSyncService,
+          useValue: mockSyncService,
         },
       ],
     }).compile();

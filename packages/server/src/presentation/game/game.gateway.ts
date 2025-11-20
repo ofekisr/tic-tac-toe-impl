@@ -5,7 +5,7 @@ import {
   OnGatewayDisconnect,
   SubscribeMessage,
 } from '@nestjs/websockets';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Server, WebSocket } from 'ws';
 import {
   ErrorMessage,
@@ -26,8 +26,10 @@ import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase
 import { JoinGameUseCase } from '../../application/use-cases/JoinGameUseCase';
 import { MessageValidator } from '../../application/services/MessageValidator';
 import { GameStateService } from '../../application/services/GameStateService';
+import { GameSyncSubscriptionService } from '../../application/services/GameSyncSubscriptionService';
 import { ErrorResponseBuilder } from '../../application/utils/ErrorResponseBuilder';
 import { GameNotFoundException } from '../../domain/exceptions/GameNotFoundException';
+import { GameState } from '@fusion-tic-tac-toe/shared';
 
 
 @WebSocketGateway({
@@ -35,7 +37,9 @@ import { GameNotFoundException } from '../../domain/exceptions/GameNotFoundExcep
   path: '/',
 })
 @Injectable()
-export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class GameGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit
+{
   @WebSocketServer()
   server!: Server;
 
@@ -53,7 +57,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly joinGameUseCase: JoinGameUseCase,
     private readonly messageValidator: MessageValidator,
     private readonly gameStateService: GameStateService,
+    private readonly gameSyncSubscriptionService: GameSyncSubscriptionService,
   ) {}
+
+  onModuleInit() {
+    // Set broadcast handler in sync subscription service to avoid circular dependency
+    this.gameSyncSubscriptionService.setBroadcastHandler(
+      (gameState: GameState) => this.broadcastGameStateUpdate(gameState),
+    );
+  }
 
   handleConnection(client: WebSocket): void {
     const connectionId = this.getConnectionId(client);
@@ -416,6 +428,51 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (client) {
         this.sendMessage(client, message);
       }
+    }
+  }
+
+  /**
+   * Broadcast game state update to all connected clients for a game.
+   * Called by sync service when receiving updates from other servers.
+   * 
+   * @param gameState - Updated game state
+   */
+  async broadcastGameStateUpdate(gameState: GameState): Promise<void> {
+    const connectionIds = this.connectionManager.getConnectionsByGameCode(
+      gameState.gameCode,
+    );
+
+    if (connectionIds.length === 0) {
+      return;
+    }
+
+    // Send appropriate message based on game status
+    if (gameState.status === 'finished') {
+      if (gameState.winner) {
+        const winMessage: WinMessage = {
+          type: 'win',
+          gameCode: gameState.gameCode,
+          board: BoardMapper.toDTO(gameState.board),
+          winner: gameState.winner,
+        };
+        this.broadcastToConnections(connectionIds, winMessage);
+      } else {
+        const drawMessage: DrawMessage = {
+          type: 'draw',
+          gameCode: gameState.gameCode,
+          board: BoardMapper.toDTO(gameState.board),
+        };
+        this.broadcastToConnections(connectionIds, drawMessage);
+      }
+    } else {
+      const updateMessage: UpdateMessage = {
+        type: 'update',
+        gameCode: gameState.gameCode,
+        board: BoardMapper.toDTO(gameState.board),
+        currentPlayer: gameState.currentPlayer,
+        status: 'playing',
+      };
+      this.broadcastToConnections(connectionIds, updateMessage);
     }
   }
 

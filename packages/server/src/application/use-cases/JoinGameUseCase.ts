@@ -2,6 +2,7 @@ import { Injectable, Logger, Inject } from '@nestjs/common';
 import { GameState, ErrorCode } from '@fusion-tic-tac-toe/shared';
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 import { ConnectionManager } from '../services/ConnectionManager';
+import { GameSyncService } from '../services/GameSyncService';
 import { GameNotFoundException } from '../../domain/exceptions/GameNotFoundException';
 import { ErrorResponseBuilder } from '../utils/ErrorResponseBuilder';
 
@@ -32,6 +33,7 @@ export class JoinGameUseCase {
     @Inject('IGameRepository')
     private readonly gameRepository: IGameRepository,
     private readonly connectionManager: ConnectionManager,
+    private readonly gameSyncService: GameSyncService,
   ) {}
 
   /**
@@ -112,6 +114,9 @@ export class JoinGameUseCase {
     this.logger.log(
       `Connection registered: connectionId=${connectionId}, gameCode=${gameCode}, playerSymbol=O`,
     );
+
+    // Publish sync message for cross-server synchronization
+    await this.gameSyncService.publishGameUpdate(gameCode, 'join', updatedGame);
 
     this.logger.log(`Game joined successfully: gameCode=${gameCode}`);
     return {

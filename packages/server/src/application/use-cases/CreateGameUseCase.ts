@@ -3,6 +3,7 @@ import { GameState, Board } from '@fusion-tic-tac-toe/shared';
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 import { GameService } from '../services/GameService';
 import { ConnectionManager } from '../services/ConnectionManager';
+import { GameSyncService } from '../services/GameSyncService';
 import { Game } from '../../domain/entities/Game';
 
 /**
@@ -25,6 +26,7 @@ export class CreateGameUseCase {
     private readonly gameRepository: IGameRepository,
     private readonly gameService: GameService,
     private readonly connectionManager: ConnectionManager,
+    private readonly gameSyncService: GameSyncService,
   ) {}
 
   /**
@@ -66,6 +68,9 @@ export class CreateGameUseCase {
     this.logger.log(
       `Connection registered: connectionId=${connectionId}, gameCode=${gameCode}, playerSymbol=X`,
     );
+
+    // Publish sync message for cross-server synchronization
+    await this.gameSyncService.publishGameUpdate(gameCode, 'join', gameState);
 
     this.logger.log(`Game created successfully: gameCode=${gameCode}`);
     return gameState;

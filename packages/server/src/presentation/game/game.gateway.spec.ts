@@ -8,6 +8,10 @@ import { GameService } from '../../application/services/GameService';
 import { MessageValidator } from '../../application/services/MessageValidator';
 import { MoveValidationService } from '../../application/services/MoveValidationService';
 import { GameStateService } from '../../application/services/GameStateService';
+import { GameSyncService } from '../../application/services/GameSyncService';
+import { GameSyncSubscriptionService } from '../../application/services/GameSyncSubscriptionService';
+import { SyncGameStateUseCase } from '../../application/use-cases/SyncGameStateUseCase';
+import { RedisService } from '../../infrastructure/redis/redis.service';
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 import { WebSocket } from 'ws';
 import { JoinGameMessage, MakeMoveMessage, ErrorCode, Board } from '@fusion-tic-tac-toe/shared';
@@ -40,25 +44,53 @@ describe('GameGateway', () => {
           inject: ['IGameRepository'],
         },
         {
+          provide: RedisService,
+          useValue: {
+            publish: jest.fn().mockResolvedValue(undefined),
+            subscribe: jest.fn().mockResolvedValue(undefined),
+            unsubscribe: jest.fn().mockResolvedValue(undefined),
+            getSubscriber: jest.fn(),
+          },
+        },
+        {
+          provide: GameSyncService,
+          useValue: {
+            publishGameUpdate: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: SyncGameStateUseCase,
+          useValue: {
+            handleSyncMessage: jest.fn().mockResolvedValue(undefined),
+            getGameStateForBroadcast: jest.fn().mockResolvedValue(null),
+          },
+        },
+        {
+          provide: GameSyncSubscriptionService,
+          useValue: {
+            setBroadcastHandler: jest.fn(),
+          },
+        },
+        {
           provide: CreateGameUseCase,
-          useFactory: (repo: IGameRepository, gameService: GameService, connMgr: ConnectionManager) =>
-            new CreateGameUseCase(repo, gameService, connMgr),
-          inject: ['IGameRepository', GameService, ConnectionManager],
+          useFactory: (repo: IGameRepository, gameService: GameService, connMgr: ConnectionManager, syncService: GameSyncService) =>
+            new CreateGameUseCase(repo, gameService, connMgr, syncService),
+          inject: ['IGameRepository', GameService, ConnectionManager, GameSyncService],
         },
         {
           provide: JoinGameUseCase,
-          useFactory: (repo: IGameRepository, connMgr: ConnectionManager) =>
-            new JoinGameUseCase(repo, connMgr),
-          inject: ['IGameRepository', ConnectionManager],
+          useFactory: (repo: IGameRepository, connMgr: ConnectionManager, syncService: GameSyncService) =>
+            new JoinGameUseCase(repo, connMgr, syncService),
+          inject: ['IGameRepository', ConnectionManager, GameSyncService],
         },
         ConnectionManager,
         MessageValidator,
         MoveValidationService,
         {
           provide: GameStateService,
-          useFactory: (repo: IGameRepository, validationService: MoveValidationService) =>
-            new GameStateService(repo, validationService),
-          inject: ['IGameRepository', MoveValidationService],
+          useFactory: (repo: IGameRepository, validationService: MoveValidationService, syncService: GameSyncService) =>
+            new GameStateService(repo, validationService, syncService),
+          inject: ['IGameRepository', MoveValidationService, GameSyncService],
         },
         UpdateGameOnDisconnectionUseCase,
         GameGateway,

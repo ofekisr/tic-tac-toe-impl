@@ -3,6 +3,7 @@ import { CreateGameUseCase } from './CreateGameUseCase';
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 import { GameService } from '../services/GameService';
 import { ConnectionManager } from '../services/ConnectionManager';
+import { GameSyncService } from '../services/GameSyncService';
 import { GameState, Board } from '@fusion-tic-tac-toe/shared';
 
 describe('CreateGameUseCase', () => {
@@ -32,6 +33,10 @@ describe('CreateGameUseCase', () => {
       removeConnectionFromGame: jest.fn(),
     } as any;
 
+    const mockSyncService = {
+      publishGameUpdate: jest.fn().mockResolvedValue(undefined),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateGameUseCase,
@@ -46,6 +51,10 @@ describe('CreateGameUseCase', () => {
         {
           provide: ConnectionManager,
           useValue: mockConnectionManager,
+        },
+        {
+          provide: GameSyncService,
+          useValue: mockSyncService,
         },
       ],
     })

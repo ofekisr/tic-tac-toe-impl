@@ -22,7 +22,10 @@ describe('GameStateService', () => {
       validateMove: jest.fn(),
     } as unknown as jest.Mocked<MoveValidationService>;
 
-    service = new GameStateService(mockRepository, mockValidationService);
+    const mockSyncService = {
+      publishGameUpdate: jest.fn().mockResolvedValue(undefined),
+    } as any;
+    service = new GameStateService(mockRepository, mockValidationService, mockSyncService);
   });
 
   describe('makeMove', () => {

@@ -3,6 +3,7 @@ import { Move, PlayerSymbol, GameState, Board } from '@fusion-tic-tac-toe/shared
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 import { Game } from '../../domain/entities/Game';
 import { MoveValidationService } from './MoveValidationService';
+import { GameSyncService } from './GameSyncService';
 import { ValidationResult } from '../../domain/value-objects/ValidationResult';
 
 /**
@@ -14,6 +15,7 @@ export class GameStateService {
   constructor(
     private readonly gameRepository: IGameRepository,
     private readonly moveValidationService: MoveValidationService,
+    private readonly gameSyncService: GameSyncService,
   ) {}
 
   /**
@@ -92,6 +94,12 @@ export class GameStateService {
     // Save to repository
     const updatedGameState = finalGame.toDTO();
     await this.gameRepository.update(updatedGameState);
+
+    // Publish sync message for cross-server synchronization
+    const syncEvent = finalStatus === 'finished' 
+      ? (finalWinner ? 'win' : 'draw')
+      : 'move';
+    await this.gameSyncService.publishGameUpdate(gameCode, syncEvent, updatedGameState);
 
     return updatedGameState;
   }
