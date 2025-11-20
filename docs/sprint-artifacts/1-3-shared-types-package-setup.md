@@ -1,6 +1,6 @@
 # Story 1.3: Shared Types Package Setup
 
-Status: drafted
+Status: review
 
 ## Story
 
@@ -28,34 +28,34 @@ So that client and server can implement against the same protocol.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Configure shared package.json (AC: #1)
-  - [ ] Create `packages/shared/package.json`
-  - [ ] Set package name: `"@fusion-tic-tac-toe/shared"`
-  - [ ] Add TypeScript as dependency
-  - [ ] Add build script: `"build": "tsc"`
-  - [ ] Configure Jest test script
-  - [ ] Test: Verify package.json is valid JSON
+- [x] Task 1: Configure shared package.json (AC: #1)
+  - [x] Create `packages/shared/package.json`
+  - [x] Set package name: `"@fusion-tic-tac-toe/shared"`
+  - [x] Add TypeScript as dependency
+  - [x] Add build script: `"build": "tsc"`
+  - [x] Configure Jest test script
+  - [x] Test: Verify package.json is valid JSON
 
-- [ ] Task 2: Create WebSocket message types (AC: #2)
-  - [ ] Create `packages/shared/src/types/messages.ts`
-  - [ ] Define `JoinGameMessage` interface (type: 'join', gameCode: string)
-  - [ ] Define `MakeMoveMessage` interface (type: 'move', gameCode: string, row: number, col: number)
-  - [ ] Define `ClientMessage` union type
-  - [ ] Define `JoinedMessage` interface (type: 'joined', gameCode, board, currentPlayer, status, playerSymbol)
-  - [ ] Define `UpdateMessage` interface (type: 'update', gameCode, board, currentPlayer, status)
-  - [ ] Define `WinMessage` interface (type: 'win', gameCode, board, winner)
-  - [ ] Define `DrawMessage` interface (type: 'draw', gameCode, board)
-  - [ ] Define `ErrorMessage` interface (type: 'error', code, message, details?)
-  - [ ] Define `ServerMessage` union type
-  - [ ] Create type guard functions: `isClientMessage()`, `isServerMessage()`
-  - [ ] Test: Write unit tests for type guards
+- [x] Task 2: Create WebSocket message types (AC: #2)
+  - [x] Create `packages/shared/src/types/messages.ts`
+  - [x] Define `JoinGameMessage` interface (type: 'join', gameCode: string)
+  - [x] Define `MakeMoveMessage` interface (type: 'move', gameCode: string, row: number, col: number)
+  - [x] Define `ClientMessage` union type
+  - [x] Define `JoinedMessage` interface (type: 'joined', gameCode, board, currentPlayer, status, playerSymbol)
+  - [x] Define `UpdateMessage` interface (type: 'update', gameCode, board, currentPlayer, status)
+  - [x] Define `WinMessage` interface (type: 'win', gameCode, board, winner)
+  - [x] Define `DrawMessage` interface (type: 'draw', gameCode, board)
+  - [x] Define `ErrorMessage` interface (type: 'error', code, message, details?)
+  - [x] Define `ServerMessage` union type
+  - [x] Create type guard functions: `isClientMessage()`, `isServerMessage()`
+  - [x] Test: Write unit tests for type guards
 
-- [ ] Task 3: Create game state types (AC: #2)
-  - [ ] Create `packages/shared/src/types/game.ts`
-  - [ ] Define `BoardCell` type: `'' | 'X' | 'O'`
-  - [ ] Define `PlayerSymbol` type: `'X' | 'O'`
-  - [ ] Define `GameStatus` type: `'waiting' | 'playing' | 'finished'`
-  - [ ] Implement `Board` class with:
+- [x] Task 3: Create game state types (AC: #2)
+  - [x] Create `packages/shared/src/types/game.ts`
+  - [x] Define `BoardCell` type: `'' | 'X' | 'O'`
+  - [x] Define `PlayerSymbol` type: `'X' | 'O'`
+  - [x] Define `GameStatus` type: `'waiting' | 'playing' | 'finished'`
+  - [x] Implement `Board` class with:
     - Constructor (accepts optional BoardCell[][])
     - `getCell(row, col): BoardCell`
     - `setCell(row, col, value): void`
@@ -64,40 +64,40 @@ So that client and server can implement against the same protocol.
     - `toArray(): BoardCell[][]`
     - `static fromArray(cells): Board`
     - Validation methods (validateBoard, validatePosition)
-  - [ ] Define `BoardDTO` type: `BoardCell[][]`
-  - [ ] Create `BoardMapper` class with `toDTO()` and `fromDTO()` methods
-  - [ ] Define `BoardPosition` interface (row, col)
-  - [ ] Define `GameState` interface (gameCode, board, currentPlayer, status, winner, players, createdAt, updatedAt)
-  - [ ] Implement `Move` class with:
+  - [x] Define `BoardDTO` type: `BoardCell[][]`
+  - [x] Create `BoardMapper` class with `toDTO()` and `fromDTO()` methods
+  - [x] Define `BoardPosition` interface (row, col)
+  - [x] Define `GameState` interface (gameCode, board, currentPlayer, status, winner, players, createdAt, updatedAt)
+  - [x] Implement `Move` class with:
     - Constructor (row, col, player, timestamp)
     - `toPosition(): BoardPosition`
     - `equals(other: Move): boolean`
     - Validation
-  - [ ] Export constants: `BOARD_SIZE = 3`, `EMPTY_CELL = ''`
-  - [ ] Test: Write unit tests for Board class (constructor, getCell, setCell, isEmpty, isFull, toArray, fromArray, validation)
-  - [ ] Test: Write unit tests for Move class (constructor, toPosition, equals, validation)
-  - [ ] Test: Write unit tests for BoardMapper (toDTO, fromDTO)
+  - [x] Export constants: `BOARD_SIZE = 3`, `EMPTY_CELL = ''`
+  - [x] Test: Write unit tests for Board class (constructor, getCell, setCell, isEmpty, isFull, toArray, fromArray, validation)
+  - [x] Test: Write unit tests for Move class (constructor, toPosition, equals, validation)
+  - [x] Test: Write unit tests for BoardMapper (toDTO, fromDTO)
 
-- [ ] Task 4: Create error types (AC: #2)
-  - [ ] Create `packages/shared/src/types/errors.ts`
-  - [ ] Define `ErrorCode` enum with values:
+- [x] Task 4: Create error types (AC: #2)
+  - [x] Create `packages/shared/src/types/errors.ts`
+  - [x] Define `ErrorCode` enum with values:
     - INVALID_MESSAGE, GAME_NOT_FOUND, GAME_FULL, INVALID_MOVE, NOT_YOUR_TURN
     - CELL_OCCUPIED, INVALID_POSITION, GAME_ALREADY_FINISHED, CONNECTION_ERROR, SERVER_ERROR
-  - [ ] Define `GameError` interface (code, message, details?)
-  - [ ] Test: Write unit tests for ErrorCode enum
+  - [x] Define `GameError` interface (code, message, details?)
+  - [x] Test: Write unit tests for ErrorCode enum
 
-- [ ] Task 5: Create index exports (AC: #2, #3)
-  - [ ] Create `packages/shared/src/index.ts`
-  - [ ] Export all types from `messages.ts`
-  - [ ] Export all types from `game.ts`
-  - [ ] Export all types from `errors.ts`
-  - [ ] Test: Verify other packages can import types via `@fusion-tic-tac-toe/shared`
+- [x] Task 5: Create index exports (AC: #2, #3)
+  - [x] Create `packages/shared/src/index.ts`
+  - [x] Export all types from `messages.ts`
+  - [x] Export all types from `game.ts`
+  - [x] Export all types from `errors.ts`
+  - [x] Test: Verify other packages can import types via `@fusion-tic-tac-toe/shared`
 
-- [ ] Task 6: Verify package exports (AC: #3)
-  - [ ] Build shared package: `npm run build`
-  - [ ] Verify dist folder contains compiled JavaScript
-  - [ ] Test: Create test import in another package to verify types are accessible
-  - [ ] Test: Verify TypeScript can resolve types correctly
+- [x] Task 6: Verify package exports (AC: #3)
+  - [x] Build shared package: `npm run build`
+  - [x] Verify dist folder contains compiled JavaScript
+  - [x] Test: Create test import in another package to verify types are accessible
+  - [x] Test: Verify TypeScript can resolve types correctly
 
 ## Dev Notes
 
@@ -144,5 +144,24 @@ So that client and server can implement against the same protocol.
 
 ### Completion Notes List
 
+- Implemented all type definitions per architecture specification
+- Created comprehensive unit tests (52 tests, all passing)
+- Board class implemented as value object with validation
+- Move class implemented with position and equality checks
+- Type guards implemented for runtime message validation
+- All types properly exported via index.ts
+- Package builds successfully and types are accessible from other packages
+- Jest configured and test suite passing
+
 ### File List
+
+- packages/shared/package.json (updated with Jest dependencies)
+- packages/shared/jest.config.js (created)
+- packages/shared/src/index.ts (updated with exports)
+- packages/shared/src/types/messages.ts (created)
+- packages/shared/src/types/messages.test.ts (created)
+- packages/shared/src/types/game.ts (created)
+- packages/shared/src/types/game.test.ts (created)
+- packages/shared/src/types/errors.ts (created)
+- packages/shared/src/types/errors.test.ts (created)
 
