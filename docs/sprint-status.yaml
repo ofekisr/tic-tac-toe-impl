@@ -33,7 +33,7 @@ development_status:
   epic-1-retrospective: optional
   epic-2: backlog
   2-1-websocket-server-setup-with-nestjs-gateway: done
-  2-2-game-code-generation: drafted
+  2-2-game-code-generation: done
   2-3-game-creation-with-initial-state: drafted
   2-4-game-joining-with-validation: drafted
   2-5-websocket-message-protocol-implementation: drafted
