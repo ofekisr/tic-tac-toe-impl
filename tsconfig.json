@@ -14,7 +14,9 @@
     "outDir": "./dist",
     "rootDir": "./",
     "composite": true,
-    "incremental": true
+    "incremental": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "exclude": [
     "node_modules",
