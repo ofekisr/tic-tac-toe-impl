@@ -26,5 +26,12 @@ export interface IGameRepository {
    * @returns Updated game state
    */
   update(game: GameState): Promise<GameState>;
+
+  /**
+   * Check if a game with the given code exists.
+   * @param gameCode - Unique game code
+   * @returns true if game exists, false otherwise
+   */
+  exists(gameCode: string): Promise<boolean>;
 }
 

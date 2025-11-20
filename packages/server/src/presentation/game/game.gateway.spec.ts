@@ -2,32 +2,47 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GameGateway } from './game.gateway';
 import { ConnectionManager } from '../../application/services/ConnectionManager';
 import { UpdateGameOnDisconnectionUseCase } from '../../application/use-cases/UpdateGameOnDisconnectionUseCase';
+import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase';
+import { GameService } from '../../application/services/GameService';
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 import { WebSocket } from 'ws';
-import { JoinGameMessage, MakeMoveMessage, ErrorCode } from '@fusion-tic-tac-toe/shared';
+import { JoinGameMessage, MakeMoveMessage, ErrorCode, Board } from '@fusion-tic-tac-toe/shared';
 
 describe('GameGateway', () => {
   let module: TestingModule;
   let gateway: GameGateway;
   let connectionManager: ConnectionManager;
   let updateGameOnDisconnectionUseCase: UpdateGameOnDisconnectionUseCase;
+  let createGameUseCase: CreateGameUseCase;
 
   beforeEach(async () => {
     const mockGameRepository: jest.Mocked<IGameRepository> = {
       create: jest.fn(),
       findByCode: jest.fn(),
       update: jest.fn(),
+      exists: jest.fn(),
     } as any;
 
     module = await Test.createTestingModule({
       providers: [
-        GameGateway,
-        ConnectionManager,
         {
           provide: 'IGameRepository',
           useValue: mockGameRepository,
         },
+        {
+          provide: GameService,
+          useFactory: (repo: IGameRepository) => new GameService(repo),
+          inject: ['IGameRepository'],
+        },
+        {
+          provide: CreateGameUseCase,
+          useFactory: (repo: IGameRepository, gameService: GameService, connMgr: ConnectionManager) =>
+            new CreateGameUseCase(repo, gameService, connMgr),
+          inject: ['IGameRepository', GameService, ConnectionManager],
+        },
+        ConnectionManager,
         UpdateGameOnDisconnectionUseCase,
+        GameGateway,
       ],
     }).compile();
 
@@ -36,6 +51,7 @@ describe('GameGateway', () => {
     updateGameOnDisconnectionUseCase = module.get<UpdateGameOnDisconnectionUseCase>(
       UpdateGameOnDisconnectionUseCase,
     );
+    createGameUseCase = module.get<CreateGameUseCase>(CreateGameUseCase);
   });
 
   afterEach(async () => {
@@ -94,7 +110,7 @@ describe('GameGateway', () => {
   });
 
   describe('handleMessage', () => {
-    it('should accept valid JoinGameMessage', () => {
+    it('should accept valid JoinGameMessage', async () => {
       const mockSend = jest.fn();
       const mockClient = {
         readyState: WebSocket.OPEN,
@@ -103,13 +119,26 @@ describe('GameGateway', () => {
 
       const validMessage: JoinGameMessage = {
         type: 'join',
-        gameCode: 'ABC123',
+        gameCode: 'NEW',
       };
 
-      gateway.handleMessage(mockClient, validMessage);
+      // Mock CreateGameUseCase for game creation
+      jest.spyOn(createGameUseCase, 'execute').mockResolvedValue({
+        gameCode: 'ABC123',
+        board: new Board(),
+        currentPlayer: 'X',
+        status: 'waiting',
+        players: { X: 'conn-1' },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
-      // Should not send error message for valid message
-      expect(mockSend).not.toHaveBeenCalled();
+      await gateway.handleMessage(mockClient, validMessage);
+
+      // Should send joined message (not error)
+      expect(mockSend).toHaveBeenCalled();
+      const sentMessage = JSON.parse(mockSend.mock.calls[0][0] as string);
+      expect(sentMessage.type).toBe('joined');
     });
 
     it('should accept valid MakeMoveMessage', () => {

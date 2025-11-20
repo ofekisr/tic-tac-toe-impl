@@ -8,8 +8,11 @@ describe('GameService', () => {
 
   beforeEach(() => {
     mockRepository = {
+      create: jest.fn(),
+      findByCode: jest.fn(),
+      update: jest.fn(),
       exists: jest.fn(),
-    };
+    } as any;
 
     gameService = new GameService(mockRepository);
   });
