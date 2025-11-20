@@ -11,5 +11,8 @@ module.exports = {
     'src/**/*.ts',
     '!src/**/*.d.ts',
   ],
+  moduleNameMapper: {
+    '^@fusion-tic-tac-toe/shared$': '<rootDir>/../shared/src',
+  },
 };
 
