@@ -6,6 +6,7 @@ import {
   SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, WebSocket } from 'ws';
+import { isClientMessage, ErrorMessage, ErrorCode } from '@fusion-tic-tac-toe/shared';
 
 @WebSocketGateway({
   port: parseInt(process.env.SERVER_PORT || '3001', 10),
@@ -26,13 +27,34 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /**
-   * Placeholder message handler structure.
-   * Message handling will be implemented in Story 2.5 (Message Protocol Implementation).
+   * Handle incoming WebSocket messages.
+   * Validates messages using type guards and sends error messages for invalid input.
    */
   @SubscribeMessage('message')
-  handleMessage(client: WebSocket, payload: any): void {
-    // Placeholder for future message handling
-    // Will be implemented in Story 2.5
+  handleMessage(client: WebSocket, payload: unknown): void {
+    // Validate incoming message using type guard
+    if (!isClientMessage(payload)) {
+      const errorMessage: ErrorMessage = {
+        type: 'error',
+        code: ErrorCode.INVALID_MESSAGE,
+        message: 'Invalid message format',
+        details: payload,
+      };
+      this.sendMessage(client, errorMessage);
+      return;
+    }
+
+    // Message is validated - actual handling will be implemented in future stories
+    // For now, we just validate the message structure
+  }
+
+  /**
+   * Send a message to a specific client.
+   */
+  private sendMessage(client: WebSocket, message: ErrorMessage): void {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(message));
+    }
   }
 
   /**
