@@ -8,16 +8,19 @@ import {
 import { Injectable, Logger } from '@nestjs/common';
 import { Server, WebSocket } from 'ws';
 import {
-  isClientMessage,
   ErrorMessage,
   ErrorCode,
   JoinGameMessage,
   JoinedMessage,
   BoardMapper,
+  ClientMessage,
 } from '@fusion-tic-tac-toe/shared';
 import { ConnectionManager } from '../../application/services/ConnectionManager';
 import { UpdateGameOnDisconnectionUseCase } from '../../application/use-cases/UpdateGameOnDisconnectionUseCase';
 import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase';
+import { MessageValidator } from '../../application/services/MessageValidator';
+import { ErrorResponseBuilder } from '../../application/utils/ErrorResponseBuilder';
+import { GameNotFoundException } from '../../domain/exceptions/GameNotFoundException';
 
 
 @WebSocketGateway({
@@ -38,6 +41,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly connectionManager: ConnectionManager,
     private readonly updateGameOnDisconnectionUseCase: UpdateGameOnDisconnectionUseCase,
     private readonly createGameUseCase: CreateGameUseCase,
+    private readonly messageValidator: MessageValidator,
   ) {}
 
   handleConnection(client: WebSocket): void {
@@ -77,27 +81,55 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /**
    * Handle incoming WebSocket messages.
-   * Validates messages using type guards and sends error messages for invalid input.
+   * Validates messages using MessageValidator and sends error messages for invalid input.
    */
   @SubscribeMessage('message')
   async handleMessage(client: WebSocket, payload: unknown): Promise<void> {
-    // Validate incoming message using type guard
-    if (!isClientMessage(payload)) {
-      const errorMessage: ErrorMessage = {
-        type: 'error',
-        code: ErrorCode.INVALID_MESSAGE,
-        message: 'Invalid message format',
-        details: payload,
-      };
-      this.sendMessage(client, errorMessage);
-      return;
-    }
+    try {
+      // Validate incoming message using MessageValidator
+      const validationResult = this.messageValidator.validateMessage(payload);
 
-    // Handle join message
-    if (payload.type === 'join') {
-      await this.handleJoinMessage(client, payload);
+      if (!validationResult.success) {
+        // Send validation error
+        const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+          validationResult.error!.code,
+          validationResult.error!.message,
+          validationResult.error!.details,
+        );
+        this.sendMessage(client, errorMessage);
+        this.logger.warn(
+          `Invalid message received: ${validationResult.error!.message}`,
+        );
+        return;
+      }
+
+      // Message is valid, proceed with handling
+      const message = validationResult.message!;
+
+      // Handle join message
+      if (message.type === 'join') {
+        await this.handleJoinMessage(client, message);
+      } else if (message.type === 'move') {
+        // Move messages will be handled in future stories
+        const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+          ErrorCode.INVALID_MESSAGE,
+          'Move messages are not yet implemented',
+        );
+        this.sendMessage(client, errorMessage);
+      }
+    } catch (error) {
+      // Catch any unexpected errors during message handling
+      this.logger.error(
+        `Unexpected error handling message: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+        ErrorCode.SERVER_ERROR,
+        'An unexpected error occurred while processing your message',
+        error instanceof Error ? { message: error.message } : { error: String(error) },
+      );
+      this.sendMessage(client, errorMessage);
     }
-    // Move messages will be handled in future stories
   }
 
   /**
@@ -135,24 +167,37 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // Joining existing game will be implemented in Story 2.4
       // For now, send error for non-NEW game codes
-      const errorMessage: ErrorMessage = {
-        type: 'error',
-        code: ErrorCode.GAME_NOT_FOUND,
-        message: 'Game joining not yet implemented',
-        details: { gameCode: message.gameCode },
-      };
+      const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+        ErrorCode.GAME_NOT_FOUND,
+        `Game code '${message.gameCode}' does not exist`,
+        { gameCode: message.gameCode },
+      );
       this.sendMessage(client, errorMessage);
     } catch (error) {
+      // Handle GameNotFoundException specifically
+      if (error instanceof GameNotFoundException) {
+        this.logger.warn(
+          `Game not found: ${error.gameCode}, connectionId=${connectionId}`,
+        );
+        const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+          ErrorCode.GAME_NOT_FOUND,
+          error.message,
+          { gameCode: error.gameCode },
+        );
+        this.sendMessage(client, errorMessage);
+        return;
+      }
+
+      // Handle other errors
       this.logger.error(
         `Error handling join message: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
       );
-      const errorMessage: ErrorMessage = {
-        type: 'error',
-        code: ErrorCode.SERVER_ERROR,
-        message: 'Failed to process game creation',
-        details: error instanceof Error ? error.message : String(error),
-      };
+      const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+        ErrorCode.SERVER_ERROR,
+        'Failed to process game creation',
+        error instanceof Error ? { message: error.message } : { error: String(error) },
+      );
       this.sendMessage(client, errorMessage);
     }
   }

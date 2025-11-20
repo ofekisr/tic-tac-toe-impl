@@ -37,7 +37,7 @@ development_status:
   2-3-game-creation-with-initial-state: review
   2-4-game-joining-with-validation: drafted
   2-5-websocket-message-protocol-implementation: done
-  2-6-message-validation-and-error-handling: drafted
+  2-6-message-validation-and-error-handling: review
   2-7-connection-management-and-cleanup: review
   epic-2-retrospective: optional
 
