@@ -3,6 +3,7 @@ import { GameGateway } from './game.gateway';
 import { ConnectionManager } from '../../application/services/ConnectionManager';
 import { UpdateGameOnDisconnectionUseCase } from '../../application/use-cases/UpdateGameOnDisconnectionUseCase';
 import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase';
+import { JoinGameUseCase } from '../../application/use-cases/JoinGameUseCase';
 import { GameService } from '../../application/services/GameService';
 import { MessageValidator } from '../../application/services/MessageValidator';
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
@@ -15,6 +16,7 @@ describe('GameGateway', () => {
   let connectionManager: ConnectionManager;
   let updateGameOnDisconnectionUseCase: UpdateGameOnDisconnectionUseCase;
   let createGameUseCase: CreateGameUseCase;
+  let joinGameUseCase: JoinGameUseCase;
 
   beforeEach(async () => {
     const mockGameRepository: jest.Mocked<IGameRepository> = {
@@ -41,6 +43,12 @@ describe('GameGateway', () => {
             new CreateGameUseCase(repo, gameService, connMgr),
           inject: ['IGameRepository', GameService, ConnectionManager],
         },
+        {
+          provide: JoinGameUseCase,
+          useFactory: (repo: IGameRepository, connMgr: ConnectionManager) =>
+            new JoinGameUseCase(repo, connMgr),
+          inject: ['IGameRepository', ConnectionManager],
+        },
         ConnectionManager,
         MessageValidator,
         UpdateGameOnDisconnectionUseCase,
@@ -54,6 +62,7 @@ describe('GameGateway', () => {
       UpdateGameOnDisconnectionUseCase,
     );
     createGameUseCase = module.get<CreateGameUseCase>(CreateGameUseCase);
+    joinGameUseCase = module.get<JoinGameUseCase>(JoinGameUseCase);
   });
 
   afterEach(async () => {

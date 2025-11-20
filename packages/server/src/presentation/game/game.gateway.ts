@@ -12,12 +12,14 @@ import {
   ErrorCode,
   JoinGameMessage,
   JoinedMessage,
+  UpdateMessage,
   BoardMapper,
   ClientMessage,
 } from '@fusion-tic-tac-toe/shared';
 import { ConnectionManager } from '../../application/services/ConnectionManager';
 import { UpdateGameOnDisconnectionUseCase } from '../../application/use-cases/UpdateGameOnDisconnectionUseCase';
 import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase';
+import { JoinGameUseCase } from '../../application/use-cases/JoinGameUseCase';
 import { MessageValidator } from '../../application/services/MessageValidator';
 import { ErrorResponseBuilder } from '../../application/utils/ErrorResponseBuilder';
 import { GameNotFoundException } from '../../domain/exceptions/GameNotFoundException';
@@ -36,17 +38,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Map WebSocket client to connection ID for stable tracking
   private readonly clientToConnectionId: WeakMap<WebSocket, string> =
     new WeakMap();
+  // Map connection ID to WebSocket client for message broadcasting
+  private readonly connectionIdToClient: Map<string, WebSocket> = new Map();
 
   constructor(
     private readonly connectionManager: ConnectionManager,
     private readonly updateGameOnDisconnectionUseCase: UpdateGameOnDisconnectionUseCase,
     private readonly createGameUseCase: CreateGameUseCase,
+    private readonly joinGameUseCase: JoinGameUseCase,
     private readonly messageValidator: MessageValidator,
   ) {}
 
   handleConnection(client: WebSocket): void {
     const connectionId = this.getConnectionId(client);
     this.clientToConnectionId.set(client, connectionId);
+    this.connectionIdToClient.set(connectionId, client);
     this.logger.log(`Client connected: ${connectionId}`);
   }
 
@@ -73,6 +79,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Remove connection from ConnectionManager
     this.connectionManager.removeConnection(connectionId);
+
+    // Remove from connectionIdToClient mapping
+    this.connectionIdToClient.delete(connectionId);
 
     this.logger.log(
       `Connection cleanup completed: connectionId=${connectionId}`,
@@ -165,14 +174,50 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      // Joining existing game will be implemented in Story 2.4
-      // For now, send error for non-NEW game codes
-      const errorMessage = ErrorResponseBuilder.buildErrorResponse(
-        ErrorCode.GAME_NOT_FOUND,
-        `Game code '${message.gameCode}' does not exist`,
-        { gameCode: message.gameCode },
+      // Handle joining existing game
+      const joinResult = await this.joinGameUseCase.execute(
+        message.gameCode,
+        connectionId,
       );
-      this.sendMessage(client, errorMessage);
+
+      // Send joined message to joining client (O)
+      const joinedMessage: JoinedMessage = {
+        type: 'joined',
+        gameCode: joinResult.gameState.gameCode,
+        board: BoardMapper.toDTO(joinResult.gameState.board),
+        currentPlayer: joinResult.gameState.currentPlayer,
+        status: joinResult.gameState.status,
+        playerSymbol: joinResult.playerSymbol,
+      };
+      this.sendMessage(client, joinedMessage);
+      this.logger.log(
+        `Game joined: gameCode=${joinResult.gameState.gameCode}, connectionId=${connectionId}, playerSymbol=${joinResult.playerSymbol}`,
+      );
+
+      // Send update message to first client (X)
+      const firstPlayerConnectionId = joinResult.gameState.players.X;
+      if (firstPlayerConnectionId) {
+        const firstPlayerClient = this.connectionIdToClient.get(
+          firstPlayerConnectionId,
+        );
+        if (firstPlayerClient) {
+          const updateMessage: UpdateMessage = {
+            type: 'update',
+            gameCode: joinResult.gameState.gameCode,
+            board: BoardMapper.toDTO(joinResult.gameState.board),
+            currentPlayer: joinResult.gameState.currentPlayer,
+            status: 'playing',
+          };
+          this.sendMessage(firstPlayerClient, updateMessage);
+          this.logger.log(
+            `Update sent to first player: gameCode=${joinResult.gameState.gameCode}, connectionId=${firstPlayerConnectionId}`,
+          );
+        } else {
+          this.logger.warn(
+            `First player client not found: connectionId=${firstPlayerConnectionId}`,
+          );
+        }
+      }
     } catch (error) {
       // Handle GameNotFoundException specifically
       if (error instanceof GameNotFoundException) {
@@ -188,6 +233,40 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
+      // Handle game full error
+      if (
+        error instanceof Error &&
+        error.message === 'Game already has two players'
+      ) {
+        this.logger.warn(
+          `Game is full: gameCode=${message.gameCode}, connectionId=${connectionId}`,
+        );
+        const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+          ErrorCode.GAME_FULL,
+          error.message,
+          { gameCode: message.gameCode },
+        );
+        this.sendMessage(client, errorMessage);
+        return;
+      }
+
+      // Handle game not in waiting status
+      if (
+        error instanceof Error &&
+        error.message.includes('Game is not in waiting status')
+      ) {
+        this.logger.warn(
+          `Game not in waiting status: gameCode=${message.gameCode}, connectionId=${connectionId}`,
+        );
+        const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+          ErrorCode.GAME_FULL,
+          'Game already has two players',
+          { gameCode: message.gameCode },
+        );
+        this.sendMessage(client, errorMessage);
+        return;
+      }
+
       // Handle other errors
       this.logger.error(
         `Error handling join message: ${error instanceof Error ? error.message : String(error)}`,
@@ -195,7 +274,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
       const errorMessage = ErrorResponseBuilder.buildErrorResponse(
         ErrorCode.SERVER_ERROR,
-        'Failed to process game creation',
+        'Failed to process game join',
         error instanceof Error ? { message: error.message } : { error: String(error) },
       );
       this.sendMessage(client, errorMessage);
@@ -207,7 +286,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
    */
   private sendMessage(
     client: WebSocket,
-    message: JoinedMessage | ErrorMessage,
+    message: JoinedMessage | UpdateMessage | ErrorMessage,
   ): void {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify(message));
