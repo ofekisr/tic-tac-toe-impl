@@ -6,6 +6,8 @@ import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase
 import { JoinGameUseCase } from '../../application/use-cases/JoinGameUseCase';
 import { GameService } from '../../application/services/GameService';
 import { MessageValidator } from '../../application/services/MessageValidator';
+import { MoveValidationService } from '../../application/services/MoveValidationService';
+import { GameStateService } from '../../application/services/GameStateService';
 import { RedisGameRepository } from '../../infrastructure/redis/redis-game.repository';
 
 /**
@@ -19,6 +21,8 @@ import { RedisGameRepository } from '../../infrastructure/redis/redis-game.repos
     ConnectionManager,
     GameService,
     MessageValidator,
+    MoveValidationService,
+    GameStateService,
     CreateGameUseCase,
     JoinGameUseCase,
     UpdateGameOnDisconnectionUseCase,

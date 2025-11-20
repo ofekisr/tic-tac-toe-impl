@@ -11,16 +11,21 @@ import {
   ErrorMessage,
   ErrorCode,
   JoinGameMessage,
+  MakeMoveMessage,
   JoinedMessage,
   UpdateMessage,
+  WinMessage,
+  DrawMessage,
   BoardMapper,
   ClientMessage,
+  Move,
 } from '@fusion-tic-tac-toe/shared';
 import { ConnectionManager } from '../../application/services/ConnectionManager';
 import { UpdateGameOnDisconnectionUseCase } from '../../application/use-cases/UpdateGameOnDisconnectionUseCase';
 import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase';
 import { JoinGameUseCase } from '../../application/use-cases/JoinGameUseCase';
 import { MessageValidator } from '../../application/services/MessageValidator';
+import { GameStateService } from '../../application/services/GameStateService';
 import { ErrorResponseBuilder } from '../../application/utils/ErrorResponseBuilder';
 import { GameNotFoundException } from '../../domain/exceptions/GameNotFoundException';
 
@@ -47,6 +52,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly createGameUseCase: CreateGameUseCase,
     private readonly joinGameUseCase: JoinGameUseCase,
     private readonly messageValidator: MessageValidator,
+    private readonly gameStateService: GameStateService,
   ) {}
 
   handleConnection(client: WebSocket): void {
@@ -119,12 +125,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (message.type === 'join') {
         await this.handleJoinMessage(client, message);
       } else if (message.type === 'move') {
-        // Move messages will be handled in future stories
-        const errorMessage = ErrorResponseBuilder.buildErrorResponse(
-          ErrorCode.INVALID_MESSAGE,
-          'Move messages are not yet implemented',
-        );
-        this.sendMessage(client, errorMessage);
+        await this.handleMoveMessage(client, message);
       }
     } catch (error) {
       // Catch any unexpected errors during message handling
@@ -282,11 +283,153 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /**
+   * Handle move message.
+   */
+  private async handleMoveMessage(
+    client: WebSocket,
+    message: MakeMoveMessage,
+  ): Promise<void> {
+    const connectionId = this.getConnectionId(client);
+
+    try {
+      // Get player symbol from connection manager
+      const playerSymbol = this.connectionManager.getPlayerSymbol(connectionId);
+      if (!playerSymbol) {
+        const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+          ErrorCode.INVALID_MOVE,
+          'You are not registered in a game',
+        );
+        this.sendMessage(client, errorMessage);
+        return;
+      }
+
+      // Create Move object
+      const move = new Move(message.row, message.col, playerSymbol);
+
+      // Process move
+      const updatedGameState = await this.gameStateService.makeMove(
+        message.gameCode,
+        move,
+        playerSymbol,
+      );
+
+      // Get all connections for this game
+      const connectionIds = this.connectionManager.getConnectionsByGameCode(
+        message.gameCode,
+      );
+
+      // Send appropriate message based on game status
+      if (updatedGameState.status === 'finished') {
+        if (updatedGameState.winner) {
+          // Win message
+          const winMessage: WinMessage = {
+            type: 'win',
+            gameCode: updatedGameState.gameCode,
+            board: BoardMapper.toDTO(updatedGameState.board),
+            winner: updatedGameState.winner,
+          };
+          this.broadcastToConnections(connectionIds, winMessage);
+        } else {
+          // Draw message
+          const drawMessage: DrawMessage = {
+            type: 'draw',
+            gameCode: updatedGameState.gameCode,
+            board: BoardMapper.toDTO(updatedGameState.board),
+          };
+          this.broadcastToConnections(connectionIds, drawMessage);
+        }
+      } else {
+        // Update message
+        const updateMessage: UpdateMessage = {
+          type: 'update',
+          gameCode: updatedGameState.gameCode,
+          board: BoardMapper.toDTO(updatedGameState.board),
+          currentPlayer: updatedGameState.currentPlayer,
+          status: 'playing',
+        };
+        this.broadcastToConnections(connectionIds, updateMessage);
+      }
+
+      this.logger.log(
+        `Move processed: gameCode=${message.gameCode}, player=${playerSymbol}, row=${message.row}, col=${message.col}`,
+      );
+    } catch (error) {
+      // Handle validation errors
+      if (error instanceof Error) {
+        // Check if it's a known error code
+        const errorCode = this.getErrorCodeFromMessage(error.message);
+        const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+          errorCode,
+          error.message,
+        );
+        this.sendMessage(client, errorMessage);
+        this.logger.warn(
+          `Move validation failed: ${error.message}, connectionId=${connectionId}`,
+        );
+      } else {
+        // Unexpected error
+        this.logger.error(
+          `Error processing move: ${error instanceof Error ? error.message : String(error)}`,
+          error instanceof Error ? error.stack : undefined,
+        );
+        const errorMessage = ErrorResponseBuilder.buildErrorResponse(
+          ErrorCode.SERVER_ERROR,
+          'Failed to process move',
+          error instanceof Error ? { message: error.message } : { error: String(error) },
+        );
+        this.sendMessage(client, errorMessage);
+      }
+    }
+  }
+
+  /**
+   * Get error code from error message.
+   */
+  private getErrorCodeFromMessage(message: string): ErrorCode {
+    if (message.includes('Not your turn')) {
+      return ErrorCode.NOT_YOUR_TURN;
+    }
+    if (message.includes('already occupied')) {
+      return ErrorCode.CELL_OCCUPIED;
+    }
+    if (message.includes('Position must be')) {
+      return ErrorCode.INVALID_POSITION;
+    }
+    if (message.includes('already finished')) {
+      return ErrorCode.GAME_ALREADY_FINISHED;
+    }
+    if (message.includes('not in playing status')) {
+      return ErrorCode.INVALID_MOVE;
+    }
+    return ErrorCode.INVALID_MOVE;
+  }
+
+  /**
+   * Broadcast a message to multiple connections.
+   */
+  private broadcastToConnections(
+    connectionIds: string[],
+    message: UpdateMessage | WinMessage | DrawMessage,
+  ): void {
+    for (const connectionId of connectionIds) {
+      const client = this.connectionIdToClient.get(connectionId);
+      if (client) {
+        this.sendMessage(client, message);
+      }
+    }
+  }
+
+  /**
    * Send a message to a specific client.
    */
   private sendMessage(
     client: WebSocket,
-    message: JoinedMessage | UpdateMessage | ErrorMessage,
+    message:
+      | JoinedMessage
+      | UpdateMessage
+      | WinMessage
+      | DrawMessage
+      | ErrorMessage,
   ): void {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify(message));
