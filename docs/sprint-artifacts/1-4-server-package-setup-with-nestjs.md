@@ -1,6 +1,6 @@
 # Story 1.4: Server Package Setup with NestJS
 
-Status: drafted
+Status: done
 
 ## Story
 
@@ -28,38 +28,38 @@ So that I can build the WebSocket server with dependency injection and clean arc
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Configure server package.json (AC: #1)
-  - [ ] Create `packages/server/package.json`
-  - [ ] Add dependencies: `@nestjs/core`, `@nestjs/common`, `@nestjs/platform-ws`, `@nestjs/websockets`, `ioredis`
-  - [ ] Add dev dependencies: `typescript`, `@types/node`, `ts-node`, `nodemon`, `jest`, `@types/jest`, `@nestjs/testing`, `ts-jest`
-  - [ ] Add build script: `"build": "tsc"`
-  - [ ] Add start script: `"start": "node dist/main.js"`
-  - [ ] Add dev script: `"dev": "nodemon --exec ts-node src/main.ts"`
-  - [ ] Add test script: `"test": "jest"`
-  - [ ] Test: Verify package.json is valid and dependencies install correctly
+- [x] Task 1: Configure server package.json (AC: #1)
+  - [x] Create `packages/server/package.json`
+  - [x] Add dependencies: `@nestjs/core`, `@nestjs/common`, `@nestjs/platform-ws`, `@nestjs/websockets`, `ioredis`
+  - [x] Add dev dependencies: `typescript`, `@types/node`, `ts-node`, `nodemon`, `jest`, `@types/jest`, `@nestjs/testing`, `ts-jest`
+  - [x] Add build script: `"build": "tsc"`
+  - [x] Add start script: `"start": "node dist/main.js"`
+  - [x] Add dev script: `"dev": "nodemon --exec ts-node src/main.ts"`
+  - [x] Add test script: `"test": "jest"`
+  - [x] Test: Verify package.json is valid and dependencies install correctly
 
-- [ ] Task 2: Create directory structure (AC: #2)
-  - [ ] Create `packages/server/src/domain/` directory
-  - [ ] Create `packages/server/src/domain/entities/` subdirectory
-  - [ ] Create `packages/server/src/domain/interfaces/` subdirectory
-  - [ ] Create `packages/server/src/domain/value-objects/` subdirectory
-  - [ ] Create `packages/server/src/application/` directory
-  - [ ] Create `packages/server/src/application/services/` subdirectory
-  - [ ] Create `packages/server/src/application/use-cases/` subdirectory
-  - [ ] Create `packages/server/src/infrastructure/` directory
-  - [ ] Create `packages/server/src/infrastructure/redis/` subdirectory
-  - [ ] Create `packages/server/src/presentation/` directory
-  - [ ] Create `packages/server/src/presentation/game/` subdirectory
-  - [ ] Test: Verify all directories exist
+- [x] Task 2: Create directory structure (AC: #2)
+  - [x] Create `packages/server/src/domain/` directory
+  - [x] Create `packages/server/src/domain/entities/` subdirectory
+  - [x] Create `packages/server/src/domain/interfaces/` subdirectory
+  - [x] Create `packages/server/src/domain/value-objects/` subdirectory
+  - [x] Create `packages/server/src/application/` directory
+  - [x] Create `packages/server/src/application/services/` subdirectory
+  - [x] Create `packages/server/src/application/use-cases/` subdirectory
+  - [x] Create `packages/server/src/infrastructure/` directory
+  - [x] Create `packages/server/src/infrastructure/redis/` subdirectory
+  - [x] Create `packages/server/src/presentation/` directory
+  - [x] Create `packages/server/src/presentation/game/` subdirectory
+  - [x] Test: Verify all directories exist
 
-- [ ] Task 3: Create minimal NestJS application (AC: #3)
-  - [ ] Create `packages/server/src/main.ts`
-  - [ ] Import NestJS bootstrap function
-  - [ ] Create minimal AppModule class
-  - [ ] Bootstrap NestJS application
-  - [ ] Configure port from environment variable (default 3001)
-  - [ ] Test: Run `npm run dev` and verify server starts without errors
-  - [ ] Test: Verify server listens on configured port
+- [x] Task 3: Create minimal NestJS application (AC: #3)
+  - [x] Create `packages/server/src/main.ts`
+  - [x] Import NestJS bootstrap function
+  - [x] Create minimal AppModule class
+  - [x] Bootstrap NestJS application
+  - [x] Configure port from environment variable (default 3001)
+  - [x] Test: Run `npm run dev` and verify server starts without errors
+  - [x] Test: Verify server listens on configured port
 
 ## Dev Notes
 
@@ -108,5 +108,32 @@ So that I can build the WebSocket server with dependency injection and clean arc
 
 ### Completion Notes List
 
+- **Task 1 Complete**: Configured `package.json` with all required NestJS dependencies (`@nestjs/core`, `@nestjs/common`, `@nestjs/platform-ws`, `@nestjs/websockets`), Redis client (`ioredis`), and dev dependencies (TypeScript tooling, Jest testing framework). Added scripts for build, start, dev (with nodemon), and test. Dependencies installed successfully with no vulnerabilities.
+
+- **Task 2 Complete**: Created complete layered architecture directory structure matching architecture specification:
+  - Domain layer: `domain/entities/`, `domain/interfaces/`, `domain/value-objects/`
+  - Application layer: `application/services/`, `application/use-cases/`
+  - Infrastructure layer: `infrastructure/redis/`
+  - Presentation layer: `presentation/game/`
+  All directories verified to exist.
+
+- **Task 3 Complete**: Created minimal NestJS application with `main.ts` bootstrap file and `AppModule` class. Application configured to listen on port 3001 (configurable via PORT environment variable). Build succeeds, code compiles without errors, and application structure follows NestJS patterns.
+
 ### File List
+
+- `packages/server/package.json` (modified - added dependencies and scripts)
+- `packages/server/src/main.ts` (created - NestJS bootstrap)
+- `packages/server/src/presentation/app.module.ts` (created - root module)
+- `packages/server/src/index.ts` (deleted - replaced by main.ts)
+- `packages/server/src/domain/` (created - directory structure)
+- `packages/server/src/domain/entities/` (created)
+- `packages/server/src/domain/interfaces/` (created)
+- `packages/server/src/domain/value-objects/` (created)
+- `packages/server/src/application/` (created)
+- `packages/server/src/application/services/` (created)
+- `packages/server/src/application/use-cases/` (created)
+- `packages/server/src/infrastructure/` (created)
+- `packages/server/src/infrastructure/redis/` (created)
+- `packages/server/src/presentation/` (created)
+- `packages/server/src/presentation/game/` (created)
 
