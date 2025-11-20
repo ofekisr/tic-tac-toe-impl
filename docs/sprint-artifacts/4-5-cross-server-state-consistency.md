@@ -1,6 +1,6 @@
 # Story 4.5: Cross-Server State Consistency
 
-Status: todo
+Status: done
 
 ## Story
 

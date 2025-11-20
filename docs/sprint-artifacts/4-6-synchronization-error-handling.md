@@ -1,6 +1,6 @@
 # Story 4.6: Synchronization Error Handling
 
-Status: todo
+Status: done
 
 ## Story
 

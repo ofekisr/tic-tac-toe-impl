@@ -53,4 +53,12 @@ development_status:
   3-10-cli-client-real-time-board-updates: done
   3-11-cli-client-win-draw-notifications: done
   epic-3-retrospective: optional
+  epic-4: contexted
+  4-1-redis-integration-setup: done
+  4-2-game-state-storage-in-redis: done
+  4-3-redis-pub-sub-for-server-synchronization: done
+  4-4-server-subscription-to-sync-channels: done
+  4-5-cross-server-state-consistency: done
+  4-6-synchronization-error-handling: done
+  epic-4-retrospective: optional
 

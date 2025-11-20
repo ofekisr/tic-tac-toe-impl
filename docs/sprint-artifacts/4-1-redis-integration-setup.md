@@ -1,6 +1,6 @@
 # Story 4.1: Redis Integration Setup
 
-Status: todo
+Status: done
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 4.3: Redis Pub/Sub for Server Synchronization
 
-Status: todo
+Status: done
 
 ## Story
 

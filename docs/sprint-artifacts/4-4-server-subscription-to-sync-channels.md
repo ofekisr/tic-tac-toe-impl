@@ -1,6 +1,6 @@
 # Story 4.4: Server Subscription to Sync Channels
 
-Status: todo
+Status: done
 
 ## Story
 

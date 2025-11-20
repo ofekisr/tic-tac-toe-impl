@@ -1,6 +1,6 @@
 # Story 4.2: Game State Storage in Redis
 
-Status: todo
+Status: done
 
 ## Story
 
