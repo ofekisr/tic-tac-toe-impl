@@ -24,8 +24,8 @@ import { ConnectionManager } from '../../application/services/ConnectionManager'
 import { UpdateGameOnDisconnectionUseCase } from '../../application/use-cases/UpdateGameOnDisconnectionUseCase';
 import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase';
 import { JoinGameUseCase } from '../../application/use-cases/JoinGameUseCase';
+import { MakeMoveUseCase } from '../../application/use-cases/MakeMoveUseCase';
 import { MessageValidator } from '../../application/services/MessageValidator';
-import { GameStateService } from '../../application/services/GameStateService';
 import { GameSyncSubscriptionService } from '../../application/services/GameSyncSubscriptionService';
 import { ErrorResponseBuilder } from '../../application/utils/ErrorResponseBuilder';
 import { GameNotFoundException } from '../../domain/exceptions/GameNotFoundException';
@@ -55,8 +55,8 @@ export class GameGateway
     private readonly updateGameOnDisconnectionUseCase: UpdateGameOnDisconnectionUseCase,
     private readonly createGameUseCase: CreateGameUseCase,
     private readonly joinGameUseCase: JoinGameUseCase,
+    private readonly makeMoveUseCase: MakeMoveUseCase,
     private readonly messageValidator: MessageValidator,
-    private readonly gameStateService: GameStateService,
     private readonly gameSyncSubscriptionService: GameSyncSubscriptionService,
   ) {}
 
@@ -318,8 +318,8 @@ export class GameGateway
       // Create Move object
       const move = new Move(message.row, message.col, playerSymbol);
 
-      // Process move
-      const updatedGameState = await this.gameStateService.makeMove(
+      // Process move using MakeMoveUseCase
+      const updatedGameState = await this.makeMoveUseCase.execute(
         message.gameCode,
         move,
         playerSymbol,

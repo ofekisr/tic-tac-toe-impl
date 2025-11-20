@@ -31,13 +31,26 @@ development_status:
   1-7-testing-framework-configuration: done
   1-1-project-structure: review
   epic-1-retrospective: optional
-  epic-2: backlog
+  epic-2: contexted
   2-1-websocket-server-setup-with-nestjs-gateway: done
   2-2-game-code-generation: done
-  2-3-game-creation-with-initial-state: review
-  2-4-game-joining-with-validation: review
+  2-3-game-creation-with-initial-state: done
+  2-4-game-joining-with-validation: done
   2-5-websocket-message-protocol-implementation: done
-  2-6-message-validation-and-error-handling: review
-  2-7-connection-management-and-cleanup: review
+  2-6-message-validation-and-error-handling: done
+  2-7-connection-management-and-cleanup: done
   epic-2-retrospective: optional
+  epic-3: contexted
+  3-1-domain-layer-board-and-move-value-objects: done
+  3-2-move-validation-service: done
+  3-3-turn-management-and-move-processing: done
+  3-4-win-condition-detection: done
+  3-5-draw-condition-detection: done
+  3-6-cli-client-websocket-connection: done
+  3-7-cli-client-initial-board-display: done
+  3-8-cli-client-user-input-handling-with-validation: done
+  3-9-cli-client-turn-based-input-control: done
+  3-10-cli-client-real-time-board-updates: done
+  3-11-cli-client-win-draw-notifications: done
+  epic-3-retrospective: optional
 

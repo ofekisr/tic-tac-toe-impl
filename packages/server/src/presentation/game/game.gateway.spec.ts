@@ -4,6 +4,7 @@ import { ConnectionManager } from '../../application/services/ConnectionManager'
 import { UpdateGameOnDisconnectionUseCase } from '../../application/use-cases/UpdateGameOnDisconnectionUseCase';
 import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase';
 import { JoinGameUseCase } from '../../application/use-cases/JoinGameUseCase';
+import { MakeMoveUseCase } from '../../application/use-cases/MakeMoveUseCase';
 import { GameService } from '../../application/services/GameService';
 import { MessageValidator } from '../../application/services/MessageValidator';
 import { MoveValidationService } from '../../application/services/MoveValidationService';
@@ -82,6 +83,12 @@ describe('GameGateway', () => {
           useFactory: (repo: IGameRepository, connMgr: ConnectionManager, syncService: GameSyncService) =>
             new JoinGameUseCase(repo, connMgr, syncService),
           inject: ['IGameRepository', ConnectionManager, GameSyncService],
+        },
+        {
+          provide: MakeMoveUseCase,
+          useFactory: (repo: IGameRepository, gameStateService: GameStateService, connMgr: ConnectionManager, syncService: GameSyncService) =>
+            new MakeMoveUseCase(repo, gameStateService, connMgr, syncService),
+          inject: ['IGameRepository', GameStateService, ConnectionManager, GameSyncService],
         },
         ConnectionManager,
         MessageValidator,
@@ -207,9 +214,9 @@ describe('GameGateway', () => {
         col: 1,
       };
 
-      // Mock game state service
-      const gameStateService = module.get<GameStateService>(GameStateService);
-      jest.spyOn(gameStateService, 'makeMove').mockRejectedValue(
+      // Mock MakeMoveUseCase
+      const makeMoveUseCase = module.get<MakeMoveUseCase>(MakeMoveUseCase);
+      jest.spyOn(makeMoveUseCase, 'execute').mockRejectedValue(
         new Error('Game not found: ABC123'),
       );
 

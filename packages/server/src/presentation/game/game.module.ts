@@ -4,6 +4,7 @@ import { ConnectionManager } from '../../application/services/ConnectionManager'
 import { UpdateGameOnDisconnectionUseCase } from '../../application/use-cases/UpdateGameOnDisconnectionUseCase';
 import { CreateGameUseCase } from '../../application/use-cases/CreateGameUseCase';
 import { JoinGameUseCase } from '../../application/use-cases/JoinGameUseCase';
+import { MakeMoveUseCase } from '../../application/use-cases/MakeMoveUseCase';
 import { GameService } from '../../application/services/GameService';
 import { MessageValidator } from '../../application/services/MessageValidator';
 import { MoveValidationService } from '../../application/services/MoveValidationService';
@@ -33,6 +34,7 @@ import { RedisGameRepository } from '../../infrastructure/redis/redis-game.repos
     GameSyncSubscriptionService,
     CreateGameUseCase,
     JoinGameUseCase,
+    MakeMoveUseCase,
     UpdateGameOnDisconnectionUseCase,
     {
       provide: 'IGameRepository',
