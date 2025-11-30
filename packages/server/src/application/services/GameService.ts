@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { GameCode } from '../../domain/value-objects/GameCode';
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 
@@ -12,7 +12,10 @@ import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 export class GameService {
   private static readonly MAX_RETRIES = 10;
 
-  constructor(private readonly gameRepository: IGameRepository) {}
+  constructor(
+    @Inject('IGameRepository')
+    private readonly gameRepository: IGameRepository,
+  ) {}
 
   /**
    * Generates a unique game code by checking against the repository.

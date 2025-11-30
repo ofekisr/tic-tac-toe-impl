@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Move, PlayerSymbol, GameState, Board } from '@fusion-tic-tac-toe/shared';
 import { IGameRepository } from '../../domain/interfaces/IGameRepository';
 import { Game } from '../../domain/entities/Game';
@@ -13,6 +13,7 @@ import { ValidationResult } from '../../domain/value-objects/ValidationResult';
 @Injectable()
 export class GameStateService {
   constructor(
+    @Inject('IGameRepository')
     private readonly gameRepository: IGameRepository,
     private readonly moveValidationService: MoveValidationService,
     private readonly gameSyncService: GameSyncService,

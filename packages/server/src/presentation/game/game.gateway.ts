@@ -33,7 +33,6 @@ import { GameState } from '@fusion-tic-tac-toe/shared';
 
 
 @WebSocketGateway({
-  port: parseInt(process.env.SERVER_PORT || '3001', 10),
   path: '/',
 })
 @Injectable()
