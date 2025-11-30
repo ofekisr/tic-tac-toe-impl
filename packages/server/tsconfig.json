@@ -4,7 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "paths": {
-      "@fusion-tic-tac-toe/shared": ["../shared/src/index.ts"]
+      "@fusion-tic-tac-toe/shared": ["../shared/dist/index.d.ts"]
     }
   },
   "include": ["src/**/*"],

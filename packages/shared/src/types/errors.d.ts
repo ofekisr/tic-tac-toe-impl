@@ -1,0 +1,18 @@
+export declare enum ErrorCode {
+    INVALID_MESSAGE = "INVALID_MESSAGE",
+    GAME_NOT_FOUND = "GAME_NOT_FOUND",
+    GAME_FULL = "GAME_FULL",
+    INVALID_MOVE = "INVALID_MOVE",
+    NOT_YOUR_TURN = "NOT_YOUR_TURN",
+    CELL_OCCUPIED = "CELL_OCCUPIED",
+    INVALID_POSITION = "INVALID_POSITION",
+    GAME_ALREADY_FINISHED = "GAME_ALREADY_FINISHED",
+    CONNECTION_ERROR = "CONNECTION_ERROR",
+    SERVER_ERROR = "SERVER_ERROR"
+}
+export interface GameError {
+    code: ErrorCode;
+    message: string;
+    details?: unknown;
+}
+//# sourceMappingURL=errors.d.ts.map

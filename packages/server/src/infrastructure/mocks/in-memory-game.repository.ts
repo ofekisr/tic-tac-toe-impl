@@ -31,5 +31,9 @@ export class InMemoryGameRepository implements IGameRepository {
     this.games.set(game.gameCode, { ...game });
     return { ...game };
   }
+
+  async exists(gameCode: string): Promise<boolean> {
+    return this.games.has(gameCode);
+  }
 }
 
