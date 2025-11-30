@@ -9,6 +9,10 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "nodemon --exec ts-node src/index.ts",
+    "run": "npm run build && npm start",
+    "run:server1": "npm run build && SERVER_URL=ws://localhost:3001 node dist/index.js",
+    "run:server2": "npm run build && SERVER_URL=ws://localhost:3002 node dist/index.js",
+    "run:docker": "npm run build && SERVER_URL=ws://localhost:80 node dist/index.js",
     "test": "jest"
   },
   "dependencies": {

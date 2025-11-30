@@ -30,12 +30,15 @@ async function main(): Promise<void> {
   });
 
   try {
-    // Prompt for server URL
-    const serverUrl = await promptInput(
-      rl,
-      'Enter server URL',
-      'ws://localhost:3001'
-    );
+    // Get server URL from environment variable or prompt
+    const defaultServerUrl = process.env.SERVER_URL || 'ws://localhost:3001';
+    const serverUrl = process.env.SERVER_URL 
+      ? defaultServerUrl
+      : await promptInput(
+          rl,
+          'Enter server URL',
+          defaultServerUrl
+        );
 
     console.log(`Connecting to ${serverUrl}...`);
 

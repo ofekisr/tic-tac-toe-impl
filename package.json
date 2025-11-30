@@ -15,7 +15,11 @@
     "test:all": "npm run test:all --workspace=packages/server",
     "dev:server": "npm run dev --workspace=packages/server",
     "dev:client": "npm run dev --workspace=packages/client",
-    "dev:mock-server": "npm run dev --workspace=packages/mock-server"
+    "dev:mock-server": "npm run dev --workspace=packages/mock-server",
+    "run:client": "npm run run --workspace=packages/client",
+    "run:client:server1": "npm run run:server1 --workspace=packages/client",
+    "run:client:server2": "npm run run:server2 --workspace=packages/client",
+    "run:client:docker": "npm run run:docker --workspace=packages/client"
   },
   "keywords": [
     "tic-tac-toe",
