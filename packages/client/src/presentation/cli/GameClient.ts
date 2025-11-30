@@ -147,7 +147,8 @@ export class GameClient {
     this.currentPlayer = message.currentPlayer;
     this.isMyTurn = this.currentPlayer === this.playerSymbol;
 
-    console.log(`\nCurrent player: ${message.currentPlayer}\n`);
+    console.log(`\n=== Board Updated ===`);
+    console.log(`Current player: ${message.currentPlayer}\n`);
     this.boardRenderer.displayBoard(message.board);
 
     if (this.isMyTurn && !this.gameFinished) {
@@ -162,13 +163,16 @@ export class GameClient {
    */
   private handleWinMessage(message: WinMessage): void {
     this.gameFinished = true;
+    
+    console.log(`\n=== Game Over ===`);
     this.boardRenderer.displayBoard(message.board);
 
     if (message.winner === this.playerSymbol) {
-      console.log('🎉 Game Over! You won!');
+      console.log('🎉 You won!');
     } else {
-      console.log(`😞 Game Over! Winner: ${message.winner}`);
+      console.log(`😞 You lost! Winner: ${message.winner}`);
     }
+    console.log('');
   }
 
   /**
@@ -176,8 +180,11 @@ export class GameClient {
    */
   private handleDrawMessage(message: DrawMessage): void {
     this.gameFinished = true;
+    
+    console.log(`\n=== Game Over ===`);
     this.boardRenderer.displayBoard(message.board);
-    console.log('🤝 Game Over! It\'s a draw!');
+    console.log('🤝 It\'s a draw!');
+    console.log('');
   }
 
   /**
